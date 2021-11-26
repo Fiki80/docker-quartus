@@ -1,6 +1,6 @@
 # Links taken from https://aur.archlinux.org/packages/quartus-free-quartus/
 
-FILES=QuartusLiteSetup-20.1.1.720-linux.run max10-20.1.1.720.qdz
+FILES=QuartusLiteSetup-20.1.1.720-linux.run max10-20.1.1.720.qdz ModelSimSetup-20.1.1.720-linux.run
 
 .PHONY: all build install
 

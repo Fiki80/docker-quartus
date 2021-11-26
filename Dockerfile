@@ -28,17 +28,19 @@ RUN /setup/QuartusLiteSetup*.run \
 		--unattendedmodeui none \
 		--installdir /opt/quartus_lite \
 		--accept_eula 1
+
+RUN /setup/ModelSimSetup*.run \
+		--modelsim_edition modelsim_ase \
+        --mode unattended \
+        --unattendedmodeui none \
+        --accept_eula 1 \
+        --installdir /opt/modelsim
+
 	
 FROM base
 COPY --from=quartus-temp /opt/quartus_lite /opt/quartus_lite
+COPY --from=quartus-temp /opt/modelsim /opt/modelsim
 
 ENV PATH "$PATH:/opt/quartus_lite/quartus/bin"
 
 CMD ["quartus", "--64bit"]
-
-# libasound2 libcairo2 libgl1-mesa-glx \
-# libdbus-1-3 libnss3 libnspr4 \
-# libxss1 \
-# libgconf-2-4 libpython2.7 libtinfo5
-
-
