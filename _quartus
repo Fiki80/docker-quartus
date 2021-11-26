@@ -1,0 +1,23 @@
+#!/bin/bash
+
+QUARTUS_HOME=$HOME/quartus_lite
+
+mkdir -p $QUARTUS_HOME
+
+xhost +local:docker
+docker run \
+	--rm \
+	--user="altera" \
+	--env="DISPLAY" \
+	--privileged --ipc host \
+	--volume="/dev/bus/usb:/dev/bus/usb" \
+	--volume="/$HOME/.config/gtk-3.0:/home/altera/.config/gtk-3.0" \
+	--volume="/usr/share/themes:/usr/share/themes" \
+	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+	--volume="/var/run/dbus:/var/run/dbus" \
+	--volume="/var/lib/dbus:/var/lib/dbus" \
+	--env DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
+	--network=host \
+	--volume="$QUARTUS_HOME:/home/altera:rw" \
+	quartus:latest
+xhost -local:docker
