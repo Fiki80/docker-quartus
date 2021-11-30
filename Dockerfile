@@ -1,45 +1,32 @@
-FROM debian:buster-slim AS base
+FROM centos:7
 
 ARG uid 
 ARG gid
 
 RUN set -eux && \
-	apt-get -y update && \
-    apt-get install -y --no-install-recommends \
-		libgtk2.0-0 libgtk-3-0 libx11-xcb1 libx11-6 libxrender1 libusb-0.1-4 \
-		libc6-i386 libncurses6 libxtst6 libxft2 libstdc++6 libc6-dev lib32z1 \
-		libncurses5 libbz2-1.0 libpng16-16 libsm6 && \
-	apt-get autoclean && apt-get clean && apt-get -y autoremove && \
-	rm -rf /var/lib/apt/lists
+	yum update -y && \
+    yum install -y \
+		libXrender libSM libX11.i686 libXau.i686 libXdmcp.i686 libusb \
+		libXext libXft-devel.i686 libXft.i686 libXrender.i686 \
+		libXt.i686 libXtst.i686 libxml2.i686 ncurses-libs.i686 && \
+	yum clean all && rm -rf /var/cache/yum
 
 RUN grep -q ${gid} /etc/group || groupadd -g ${gid} altera
 RUN useradd -u ${uid} -g ${gid} -m altera
-# RUN mkdir /var/run/dbus
         
-FROM base AS quartus-temp
-
-# ARG filename
-
 ADD *.run /setup/
 ADD *.qdz /setup/
 
-RUN /setup/QuartusLiteSetup*.run \
+# Modelsim is installed automatically if present
+RUN	/setup/QuartusLiteSetup*.run \
 		--mode unattended \
 		--unattendedmodeui none \
 		--installdir /opt/quartus_lite \
-		--accept_eula 1
+		--accept_eula 1 && \
+	rm -rf /setup
 
-RUN /setup/ModelSimSetup*.run \
-		--modelsim_edition modelsim_ase \
-        --mode unattended \
-        --unattendedmodeui none \
-        --accept_eula 1 \
-        --installdir /opt/modelsim
-
-	
-FROM base
-COPY --from=quartus-temp /opt/quartus_lite /opt/quartus_lite
-COPY --from=quartus-temp /opt/modelsim /opt/modelsim
+# Fix Modelsim missing persmissions
+RUN if [ -d /opt/quartus_lite/modelsim_ase ]; then find /opt/quartus_lite/modelsim_ase \! -perm /o+rwx -exec chmod o=g {} \;; fi
 
 ENV PATH "$PATH:/opt/quartus_lite/quartus/bin"
 
